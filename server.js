@@ -22,23 +22,14 @@ io.on('connection', function (socket) {
       socket.broadcast.emit('paddleChange', JSON.stringify(paddleData));
     });
     
-    socket.on('teamAScore', function(data) {
-      if (++gameState.score.a >=15) {
+    socket.on('score', function(team) {
+      gameState.score[team]++;
+      if (gameState.score[team] >=15) {
         io.sockets.emit('gameOver', JSON.stringify(gameState.score));
       } else {
         io.sockets.emit('scoreChange', JSON.stringify(gameState.score));
       }
-    });
-    socket.on('teamBScore', function(data) {
-      if (++gameState.score.b >=15) {
-        io.sockets.emit('gameOver', JSON.stringify(gameState.score));
-      }
-      else {
-        io.sockets.emit('scoreChange', JSON.stringify(gameState.score));
-      }
-    });
-   
-    
+    });    
 });
 
 /*
