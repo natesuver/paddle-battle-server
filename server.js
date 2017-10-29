@@ -4,9 +4,9 @@ http    = require('http').createServer(app),
 io      = require('socket.io')(http);
 
 http.listen(3000);
-var gameState={score: {'a':0,'b':0 },players:[], started:false};
+var gameState={score: {'a':0,'b':0 },players:[], started:false, gameId: 0};
 io.on('connection', function (socket) {
-    
+    gameState.gameId = socket.handshake.query['gameId'];
    // console.log("Connection to Game " + socket.handshake.query['gameId'] + " established!!!");
     socket.emit('handshake', JSON.stringify(gameState));
     
@@ -19,7 +19,7 @@ io.on('connection', function (socket) {
       socket.broadcast.emit('impact', JSON.stringify(impactData));
     });
 
-    socket.on('gameStarted', function (impactData) {
+    socket.on('gameStarted', function (data) {
       gameState.started = true;
       io.sockets.emit('stateChange', JSON.stringify(gameState));
     });
