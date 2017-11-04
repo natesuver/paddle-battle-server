@@ -4,7 +4,11 @@ http    = require('http').createServer(app),
 io      = require('socket.io')(http);
 
 http.listen(3000);
-var gameState={score: {'a':0,'b':0 },players:[], started:false, gameId: 0};
+var gameState, scoreUpperBound = 15;
+function initGameState() {
+  gameState={score: {'a':0,'b':0 },players:[], started:false, gameId: 0};
+}
+initGameState();
 io.on('connection', function (socket) {
     gameState.gameId = socket.handshake.query['gameId'];
    // console.log("Connection to Game " + socket.handshake.query['gameId'] + " established!!!");
@@ -30,8 +34,8 @@ io.on('connection', function (socket) {
     
     socket.on('score', function(team) {
       gameState.score[team]++;
-      if (gameState.score[team] >=15) {
-        gameState.started = false;
+      if (gameState.score[team] >=scoreUpperBound) {
+        initGameState();
         io.sockets.emit('stateChange', JSON.stringify(gameState));
         io.sockets.emit('gameOver', JSON.stringify(gameState.score));
       } else {
@@ -42,22 +46,3 @@ io.on('connection', function (socket) {
       io.emit('disconnected');
     });
 });
-
-/*
-socket.on('handshake', function (data) {
-  console.log("Connection Established");
-  this.onConnect();
-});
-socket.on('stateChange', function (stateInfo) {
-  this.onUpdateState(JSON.parse(stateInfo));
-});
-socket.on('impact', function (impactInfo) {
-  this.onImpact(JSON.parse(impactInfo));
-});
-socket.on('paddleChange', function (paddleInfo) {
-  this.onPaddleChange(JSON.parse(paddleInfo));
-});
-socket.on('gameOver', function(stateInfo) {
-  this.onGameOver(JSON.parse(paddleInfo))
-});
-*/
