@@ -4,19 +4,19 @@ http    = require('http').createServer(app),
 io      = require('socket.io')(http);
 
 http.listen(3000);
-scoreUpperBound = 15;
+scoreUpperBound = 1000;
 function initGameState() {
   return {score: {'a':0,'b':0 },players:{}, started:false, gameId: 0};
 }
+var gameState = initGameState();
 io.on('connection', function (socket) {
-    this.gameState = initGameState();
     var self = this;
-    this.gameState.gameId = socket.handshake.query['gameId'];
+    gameState.gameId = socket.handshake.query['gameId'];
    // console.log("Connection to Game " + socket.handshake.query['gameId'] + " established!!!");
-    socket.emit('handshake', JSON.stringify(this.gameState));
+    socket.emit('handshake', JSON.stringify(gameState));
     
     socket.on('stateChange', function (playerData) {
-      socket.broadcast.emit('stateChange', JSON.stringify(self.gameState));
+      socket.broadcast.emit('stateChange', JSON.stringify(gameState));
     });
    
     socket.on('impactDetected', function (impactData) {
@@ -24,11 +24,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on('gameStarted', function (data) {
-      self.gameState.started = true;
-      io.sockets.emit('stateChange', JSON.stringify(self.gameState));
+      gameState.started = true;
+      io.sockets.emit('stateChange', JSON.stringify(gameState));
     });
     socket.on('hit', function (playerId) {
-      var state = self.gameState;
+      var state = gameState;
       if (!state.players["p"+playerId]) {
         state.players["p"+playerId]={id: playerId, hits:0};
       }
@@ -40,13 +40,13 @@ io.on('connection', function (socket) {
     });
     
     socket.on('score', function(team) {
-      self.gameState.score[team]++;
-      if (self.gameState.score[team] >=scoreUpperBound) {
+      gameState.score[team]++;
+      if (gameState.score[team] >=scoreUpperBound) {
         initGameState();
-        io.sockets.emit('stateChange', JSON.stringify(self.gameState));
-        io.sockets.emit('gameOver', JSON.stringify(self.gameState));
+        io.sockets.emit('stateChange', JSON.stringify(gameState));
+        io.sockets.emit('gameOver', JSON.stringify(gameState));
       } else {
-        io.sockets.emit('scoreChange', JSON.stringify(self.gameState.score));
+        io.sockets.emit('scoreChange', JSON.stringify(gameState.score));
       }
     });    
     socket.on('disconnect', function () {
