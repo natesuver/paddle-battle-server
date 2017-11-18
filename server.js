@@ -4,7 +4,7 @@ http    = require('http').createServer(app),
 io      = require('socket.io')(http);
 
 http.listen(3000);
-scoreUpperBound = 1000;
+scoreUpperBound = 15;
 function initGameState() {
   return {score: {'a':0,'b':0 },players:{}, started:false, gameId: 0};
 }
