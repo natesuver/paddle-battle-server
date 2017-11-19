@@ -42,9 +42,10 @@ io.on('connection', function (socket) {
     socket.on('score', function(team) {
       gameState.score[team]++;
       if (gameState.score[team] >=scoreUpperBound) {
-        gameState = initGameState();
+        
         io.sockets.emit('stateChange', JSON.stringify(gameState));
         io.sockets.emit('gameOver', JSON.stringify(gameState));
+        gameState = initGameState();
       } else {
         io.sockets.emit('scoreChange', JSON.stringify(gameState.score));
       }
